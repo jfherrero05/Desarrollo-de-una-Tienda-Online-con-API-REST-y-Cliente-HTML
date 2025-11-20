@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Categoría - Tienda RA4</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><a href="dashboard.html">Mi Tienda</a></div>
+        <div class="nav-links">
+            <a href="dashboard.html">Inicio</a>
+            <a href="cart.html">Carrito (<span id="cart-count">0</span>)</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 id="category-title">Cargando...</h2>
+        <button class="btn" onclick="window.location.href='dashboard.html'">Volver</button>
+        
+        <div class="grid-products" id="cat-products-container"></div>
+    </div>
+
+    <script>
+        // Script incrustado para simplificar, o puedes crear assets/js/categories.js
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Verificar Seguridad
+            if (!localStorage.getItem('token')) window.location.href = 'login.html';
+
+            // 2. Recuperar datos
+            const catId = parseInt(localStorage.getItem('current_category_id'));
+            const tiendaData = JSON.parse(localStorage.getItem('tienda_data'));
+            
+            // 3. Buscar nombre de la categoría
+            const categoria = tiendaData.categorias.find(c => c.id === catId);
+            if(categoria) {
+                document.getElementById('category-title').innerText = categoria.nombre;
+                
+                // 4. Filtrar productos de esta categoría
+                const productosFiltrados = tiendaData.productos.filter(p => p.id_categoria === catId);
+                const container = document.getElementById('cat-products-container');
+
+                productosFiltrados.forEach(prod => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <img src="${prod.imagen}" onerror="this.src='https://via.placeholder.com/150'">
+                        <h4>${prod.nombre}</h4>
+                        <p>${prod.precio} €</p>
+                        <button class="btn" onclick="verProducto(${prod.id})">Ver Detalles</button>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                document.getElementById('category-title').innerText = "Categoría no encontrada";
+            }
+            
+            actualizarContador();
+        });
+
+        function verProducto(id) {
+            localStorage.setItem('current_product_id', id);
+            window.location.href = 'product.html';
+        }
+
+        function actualizarContador() {
+            const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+            document.getElementById('cart-count').textContent = carrito.length;
+        }
+    </script>
+</body>
+</html>

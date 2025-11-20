@@ -1,0 +1,36 @@
+{
+    "categorias": [
+        { "id": 1, "nombre": "Electrónica" },
+        { "id": 2, "nombre": "Ropa" },
+        { "id": 3, "nombre": "Hogar" }
+    ],
+    "productos": [
+        {
+            "id": 101,
+            "nombre": "Nokia Indestructible",
+            "precio": 399.99,
+            "descripcion": "El clásico que nunca muere. Batería infinita.",
+            "imagen": "assets/img/nokia.jpg",
+            "destacado": true,
+            "id_categoria": 1
+        },
+        {
+            "id": 102,
+            "nombre": "Camiseta CR7",
+            "precio": 519.99,
+            "descripcion": "Camiseta oficial de Cristiano. ¡Siuuu!",
+            "imagen": "assets/img/cristiano.jpg",
+            "destacado": false,
+            "id_categoria": 2
+        },
+        {
+            "id": 103,
+            "nombre": "Lámpara Dragon Ball",
+            "precio": 55.50,
+            "descripcion": "Ilumina tu habitación con el poder de las esferas.",
+            "imagen": "assets/img/foto lampara dragon ball.jpg",
+            "destacado": true,
+            "id_categoria": 3
+        }
+    ]
+}

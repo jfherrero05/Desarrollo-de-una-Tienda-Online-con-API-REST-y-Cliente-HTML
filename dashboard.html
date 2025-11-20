@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tienda RA4</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Mi Tienda Online</div>
+        <div class="nav-links">
+            <span id="user-display">Hola, Usuario</span>
+            <a href="cart.html">Carrito (<span id="cart-count">0</span>)</a>
+            <button id="logout-btn" class="btn-danger">Cerrar Sesión</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="categories-section">
+            <h2>Categorías</h2>
+            <div class="grid-categories" id="categories-container">
+                </div>
+        </section>
+
+        <section id="featured-section">
+            <h2>Productos Destacados</h2>
+            <div class="grid-products" id="products-container">
+                </div>
+        </section>
+    </div>
+
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>
