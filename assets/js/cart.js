@@ -1,57 +1,82 @@
 document.addEventListener('DOMContentLoaded', () => {
-    if (!localStorage.getItem('token')) window.location.href = 'login.html';
-    cargarCarrito();
+    // 1. Cargar Carrito al iniciar
+    renderizarCarrito();
 
-    document.getElementById('checkout-btn').addEventListener('click', procesarCompra);
+    // 2. Event Listeners para botones
+    const btnProcesar = document.getElementById('btn-procesar');
+    const btnVaciar = document.getElementById('btn-vaciar');
+
+    if(btnProcesar) btnProcesar.addEventListener('click', procesarCompra);
+    if(btnVaciar) btnVaciar.addEventListener('click', vaciarCarrito);
 });
 
-function cargarCarrito() {
+function renderizarCarrito() {
+    // Lectura segura de LocalStorage
     const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-    const container = document.getElementById('cart-items');
-    const totalElem = document.getElementById('total-price');
+    const tiendaData = JSON.parse(localStorage.getItem('tienda_data')); // Asegúrate que en login.js se guarda como 'tienda_data'
     
-    container.innerHTML = '';
-    let total = 0;
+    const wrapper = document.getElementById('cart-items-wrapper');
+    const totalDisplay = document.getElementById('total-display');
 
-    if (carrito.length === 0) {
-        container.innerHTML = '<p>El carrito está vacío.</p>';
-        totalElem.textContent = '0.00 €';
+    // Validación: Si no hay datos de tienda (usuario no logueado o caché borrada)
+    if (!tiendaData || !tiendaData.productos) {
+        wrapper.innerHTML = '<p style="text-align:center; color:red;">Error: No hay datos de productos. Por favor, <a href="login.html" style="color:#38bdf8;">inicia sesión de nuevo</a>.</p>';
         return;
     }
 
-    carrito.forEach((prod, index) => {
-        total += parseFloat(prod.precio);
-        
-        const item = document.createElement('div');
-        item.className = 'card';
-        item.style.marginBottom = '10px';
-        item.style.display = 'flex';
-        item.style.justifyContent = 'space-between';
-        item.style.alignItems = 'center';
-        item.style.textAlign = 'left';
+    wrapper.innerHTML = ''; // Limpiar
+    let total = 0;
 
-        item.innerHTML = `
-            <div style="display:flex; align-items:center; gap:10px;">
-                <img src="${prod.imagen}" style="width:50px; height:50px; object-fit:cover;">
-                <div>
-                    <strong>${prod.nombre}</strong><br>
-                    <span>${prod.precio} €</span>
+    if (carrito.length === 0) {
+        wrapper.innerHTML = '<p style="text-align:center; padding: 40px; font-size: 1.2rem;">Tu carrito está vacío 🛒</p>';
+        totalDisplay.textContent = '0.00 €';
+        return;
+    }
+
+    // Recorremos el carrito
+    carrito.forEach((item, index) => {
+        // Buscamos el producto real en los datos de la tienda
+        const producto = tiendaData.productos.find(p => p.id == item.id);
+
+        if (producto) {
+            const subtotal = producto.precio * item.cantidad;
+            total += subtotal;
+
+            const div = document.createElement('div');
+            div.className = 'cart-item';
+            div.innerHTML = `
+                <div class="item-left">
+                    <img src="${producto.imagen}" onerror="this.src='https://via.placeholder.com/80?text=Sin+Foto'">
+                    <div class="item-info">
+                        <h4>${producto.nombre}</h4>
+                        <p>Precio: ${producto.precio} € | Cantidad: ${item.cantidad}</p>
+                    </div>
                 </div>
-            </div>
-            <button class="btn-danger" onclick="eliminarDelCarrito(${index})">Eliminar</button>
-        `;
-        container.appendChild(item);
+                <div class="item-right">
+                    <span class="item-price">${subtotal.toFixed(2)} €</span>
+                    <button class="btn btn-danger" onclick="eliminarItem(${index})" style="padding: 5px 12px;">X</button>
+                </div>
+            `;
+            wrapper.appendChild(div);
+        }
     });
 
-    totalElem.textContent = total.toFixed(2) + ' €';
+    totalDisplay.textContent = total.toFixed(2) + ' €';
 }
 
-function eliminarDelCarrito(index) {
+// Función global para eliminar (necesaria para el onclick del HTML)
+window.eliminarItem = function(index) {
     let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-    carrito.splice(index, 1); // Eliminar el elemento en esa posición
+    carrito.splice(index, 1);
     localStorage.setItem('carrito', JSON.stringify(carrito));
-    cargarCarrito(); // Recargar la vista
-    // Actualizar contador visual si lo tuviéramos en el navbar
+    renderizarCarrito(); // Repintar
+};
+
+function vaciarCarrito() {
+    if(confirm('¿Seguro que quieres borrar todo?')) {
+        localStorage.removeItem('carrito');
+        renderizarCarrito();
+    }
 }
 
 async function procesarCompra() {
@@ -62,35 +87,41 @@ async function procesarCompra() {
         return;
     }
 
-    // PREPARAR DATOS: Solo enviamos los IDs. 
-    // Seguridad: No enviamos el precio, el servidor debe buscarlo.
-    const listaIDs = carrito.map(p => p.id);
-    const token = localStorage.getItem('token');
+    const msg = document.getElementById('status-msg');
+    msg.textContent = "Procesando pedido...";
+    msg.style.color = "#38bdf8"; // Azul
+
+    // Preparar datos para PHP
+    const payload = {
+        token: localStorage.getItem('token') || 'TOKEN-TEST',
+        carrito: carrito // Enviamos [{id:1, cantidad:1}, ...]
+    };
 
     try {
         const response = await fetch('api/compra.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                token: token, 
-                productos: listaIDs 
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
         const data = await response.json();
 
         if (data.status === 'success') {
-            alert(`¡Compra realizada con éxito!\nTotal validado por servidor: ${data.total} €`);
-            // Limpiar carrito
+            msg.textContent = `✅ Compra OK! Total validado: ${data.total} €`;
+            msg.style.color = "#22c55e"; // Verde
+            
+            // Vaciar carrito tras éxito
             localStorage.removeItem('carrito');
-            window.location.href = 'dashboard.html';
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 2500);
         } else {
-            alert("Error en la compra: " + data.message);
+            throw new Error(data.message || "Error desconocido");
         }
+
     } catch (error) {
         console.error(error);
-        alert("Error de conexión con el servidor");
+        msg.textContent = "❌ Error: " + error.message;
+        msg.style.color = "#ef4444";
     }
 }

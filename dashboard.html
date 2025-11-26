@@ -3,33 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Tienda RA4</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <title>Dashboard - Tienda Dark</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=3.0">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">Mi Tienda Online</div>
-        <div class="nav-links">
-            <span id="user-display">Hola, Usuario</span>
-            <a href="cart.html">Carrito (<span id="cart-count">0</span>)</a>
-            <button id="logout-btn" class="btn-danger">Cerrar Sesión</button>
+
+    <header>
+        <h1>Mi Tienda Online</h1>
+        <div id="user-info">
+            <span id="user-display">Cargando...</span>
+            <div style="position: relative; display: inline-block;">
+                <a href="cart.html" class="btn btn-secondary">
+                    🛒 Carrito <span id="cart-count" style="background: var(--danger); color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; vertical-align: top;">0</span>
+                </a>
+            </div>
+            <button id="logout-btn" class="btn btn-danger">Salir</button>
         </div>
-    </nav>
+    </header>
 
-    <div class="container">
-        <section id="categories-section">
+    <main>
+        <section>
             <h2>Categorías</h2>
-            <div class="grid-categories" id="categories-container">
-                </div>
+            <div id="categories-container" class="grid-productos">
+                <p style="color: var(--text-muted);">Cargando categorías...</p>
+            </div>
         </section>
 
-        <section id="featured-section">
+        <section style="margin-top: 50px;">
             <h2>Productos Destacados</h2>
-            <div class="grid-products" id="products-container">
-                </div>
+            <div id="products-container" class="grid-productos">
+                <p style="color: var(--text-muted);">Cargando productos...</p>
+            </div>
         </section>
-    </div>
 
-    <script src="assets/js/dashboard.js"></script>
+        <section id="recientes-section">
+            <div id="recientes-container"></div>
+        </section>
+    </main>
+
+    <script src="assets/js/dashboard.js?v=3.0"></script>
 </body>
 </html>

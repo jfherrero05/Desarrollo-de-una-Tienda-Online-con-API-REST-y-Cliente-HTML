@@ -2,81 +2,68 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detalle Producto - Tienda RA4</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle Producto - Tienda Dark</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=3.0">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo"><a href="dashboard.html">Mi Tienda</a></div>
-        <div class="nav-links">
-            <a href="dashboard.html">Inicio</a>
-            <a href="cart.html">Carrito (<span id="cart-count">0</span>)</a>
+    <header>
+        <h1><a href="dashboard.html">Tienda</a> / Detalle</h1>
+        <div id="user-info">
+            <a href="cart.html" class="btn btn-secondary">🛒 Ver Carrito</a>
         </div>
-    </nav>
+    </header>
 
-    <div class="container">
-        <div id="product-detail" class="product-detail-container">
+    <main style="display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; margin-top: 40px;">
+        
+        <div style="flex: 1; min-width: 300px; background: var(--card-bg); padding: 30px; border-radius: 12px; text-align: center; box-shadow: var(--shadow);">
+            <img id="prod-img" src="" alt="Producto" style="max-width: 100%; height: auto; max-height: 400px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));">
+        </div>
+
+        <div style="flex: 1; min-width: 300px;">
+            <h2 id="prod-name" style="border: none; font-size: 2.5rem; margin-bottom: 10px; color: var(--text-main);">Nombre</h2>
+            
+            <p id="prod-price" style="font-size: 2.5rem; color: var(--accent); font-weight: bold; margin-bottom: 20px;">0 €</p>
+            
+            <div style="background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--accent);">
+                <p id="prod-desc" style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">Descripción...</p>
             </div>
-    </div>
+
+            <button id="add-btn" class="btn" style="padding: 15px 40px; font-size: 1.2rem; width: 100%; max-width: 300px;">AÑADIR AL CARRITO</button>
+            
+            <br><br>
+            <a href="dashboard.html" class="btn btn-secondary">← Seguir comprando</a>
+        </div>
+    </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            if (!localStorage.getItem('token')) window.location.href = 'login.html';
-
-            const prodId = parseInt(localStorage.getItem('current_product_id'));
-            const tiendaData = JSON.parse(localStorage.getItem('tienda_data'));
-            const producto = tiendaData.productos.find(p => p.id === prodId);
-
-            if(producto) {
-                // 1. Renderizar detalles
-                const container = document.getElementById('product-detail');
-                container.innerHTML = `
-                    <div class="detail-image">
-                        <img src="${producto.imagen}" onerror="this.src='https://via.placeholder.com/300'" style="width:100%; border-radius:8px;">
-                    </div>
-                    <div class="detail-info">
-                        <h2>${producto.nombre}</h2>
-                        <h3 style="color: var(--accent);">${producto.precio} €</h3>
-                        <p>${producto.descripcion}</p>
-                        <button class="btn" onclick="agregarAlCarrito(${producto.id})">Añadir al Carrito</button>
-                        <br><br>
-                        <button class="btn-danger" onclick="window.history.back()">Volver</button>
-                    </div>
-                `;
-
-                // 2. Lógica "Vistos Recientemente" (Requisito del Anexo)
-                registrarVisto(producto);
-            }
-            actualizarContador();
-        });
-
-        function registrarVisto(producto) {
-            let vistos = JSON.parse(localStorage.getItem('productos_vistos')) || [];
-            // Evitar duplicados: si ya está, lo quitamos para ponerlo el primero (o lo dejamos, según prefieras)
-            vistos = vistos.filter(p => p.id !== producto.id);
-            // Añadir al principio
-            vistos.unshift(producto);
-            // Mantener solo los últimos 5, por ejemplo
-            if(vistos.length > 5) vistos.pop();
+            const prodId = localStorage.getItem('current_product_id');
+            const tienda = JSON.parse(localStorage.getItem('tienda_data'));
             
-            localStorage.setItem('productos_vistos', JSON.stringify(vistos));
-        }
+            if(!prodId || !tienda) { window.location.href = 'dashboard.html'; return; }
 
-        function agregarAlCarrito(id) {
-            // Misma lógica que en el dashboard
-            let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-            const tiendaData = JSON.parse(localStorage.getItem('tienda_data'));
-            const prod = tiendaData.productos.find(p => p.id === id);
-            carrito.push(prod);
-            localStorage.setItem('carrito', JSON.stringify(carrito));
-            actualizarContador();
-            alert('Producto añadido al carrito');
-        }
+            const prod = tienda.productos.find(p => p.id == prodId);
+            
+            if(prod) {
+                document.getElementById('prod-name').textContent = prod.nombre;
+                document.getElementById('prod-price').textContent = prod.precio + ' €';
+                document.getElementById('prod-desc').textContent = prod.descripcion;
+                document.getElementById('prod-img').src = prod.imagen;
 
-        function actualizarContador() {
-            const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-            document.getElementById('cart-count').textContent = carrito.length;
-        }
+                document.getElementById('add-btn').onclick = () => {
+                    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+                    const existente = carrito.find(item => item.id === prod.id);
+                    if(existente) {
+                        existente.cantidad++;
+                    } else {
+                        carrito.push({ id: prod.id, cantidad: 1 });
+                    }
+                    localStorage.setItem('carrito', JSON.stringify(carrito));
+                    alert('¡Producto añadido al carrito!');
+                };
+            }
+        });
     </script>
 </body>
 </html>

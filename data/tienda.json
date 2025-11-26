@@ -20,7 +20,7 @@
             "precio": 519.99,
             "descripcion": "Camiseta oficial de Cristiano. ¡Siuuu!",
             "imagen": "assets/img/cristiano.jpg",
-            "destacado": false,
+            "destacado": true,
             "id_categoria": 2
         },
         {

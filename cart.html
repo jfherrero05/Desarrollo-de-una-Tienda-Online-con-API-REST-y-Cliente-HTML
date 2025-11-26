@@ -2,32 +2,35 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Carrito - Tienda RA4</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito - Mi Tienda</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=2.0">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo"><a href="dashboard.html">Mi Tienda</a></div>
-        <div class="nav-links">
-            <a href="dashboard.html">Seguir Comprando</a>
-        </div>
-    </nav>
 
-    <div class="container">
-        <h2>Tu Carrito</h2>
-        
-        <div id="cart-wrapper" style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <div id="cart-items" style="flex: 2;">
-                </div>
+    <header>
+        <h1>Mi Carrito</h1>
+        <a href="dashboard.html" class="btn btn-secondary">← Seguir Comprando</a>
+    </header>
 
-            <div id="cart-summary" class="card" style="flex: 1; height: fit-content;">
-                <h3>Resumen</h3>
-                <p>Total: <span id="total-price" style="font-weight: bold; font-size: 1.2em;">0.00 €</span></p>
-                <button id="checkout-btn" class="btn" style="width: 100%; background-color: #27ae60;">Finalizar Compra</button>
+    <main>
+        <div class="cart-container">
+            
+            <div id="cart-items-wrapper">
+                <p style="text-align: center; padding: 20px; color: #94a3b8;">Cargando productos...</p>
             </div>
-        </div>
-    </div>
 
-    <script src="assets/js/cart.js"></script>
+            <div id="total-display">0.00 €</div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 15px;">
+                <button id="btn-vaciar" class="btn btn-danger">Vaciar Carrito</button>
+                <button id="btn-procesar" class="btn">Finalizar Compra</button>
+            </div>
+
+            <p id="status-msg"></p>
+        </div>
+    </main>
+
+    <script src="assets/js/cart.js?v=2.0"></script>
 </body>
 </html>

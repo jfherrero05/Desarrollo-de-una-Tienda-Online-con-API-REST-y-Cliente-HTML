@@ -2,70 +2,64 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Categoría - Tienda RA4</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categoría - Tienda Dark</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=3.0">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo"><a href="dashboard.html">Mi Tienda</a></div>
-        <div class="nav-links">
-            <a href="dashboard.html">Inicio</a>
-            <a href="cart.html">Carrito (<span id="cart-count">0</span>)</a>
+    <header>
+        <h1><a href="dashboard.html">Tienda</a> / Categorías</h1>
+        <div id="user-info">
+            <a href="cart.html" class="btn btn-secondary">🛒 Ver Carrito</a>
         </div>
-    </nav>
+    </header>
 
-    <div class="container">
-        <h2 id="category-title">Cargando...</h2>
-        <button class="btn" onclick="window.location.href='dashboard.html'">Volver</button>
+    <main>
+        <h2 id="category-title" style="color: var(--accent);">Cargando...</h2>
         
-        <div class="grid-products" id="cat-products-container"></div>
-    </div>
+        <div id="category-products-container" class="grid-productos">
+            </div>
+        
+        <div style="margin-top: 40px;">
+            <a href="dashboard.html" class="btn btn-secondary">← Volver al Dashboard</a>
+        </div>
+    </main>
 
     <script>
-        // Script incrustado para simplificar, o puedes crear assets/js/categories.js
+        // Pequeño script integrado para esta página específica
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Verificar Seguridad
-            if (!localStorage.getItem('token')) window.location.href = 'login.html';
+            const catId = localStorage.getItem('current_category_id');
+            const tienda = JSON.parse(localStorage.getItem('tienda_data'));
 
-            // 2. Recuperar datos
-            const catId = parseInt(localStorage.getItem('current_category_id'));
-            const tiendaData = JSON.parse(localStorage.getItem('tienda_data'));
-            
-            // 3. Buscar nombre de la categoría
-            const categoria = tiendaData.categorias.find(c => c.id === catId);
-            if(categoria) {
-                document.getElementById('category-title').innerText = categoria.nombre;
-                
-                // 4. Filtrar productos de esta categoría
-                const productosFiltrados = tiendaData.productos.filter(p => p.id_categoria === catId);
-                const container = document.getElementById('cat-products-container');
+            if(!catId || !tienda) { window.location.href = 'dashboard.html'; return; }
 
-                productosFiltrados.forEach(prod => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <img src="${prod.imagen}" onerror="this.src='https://via.placeholder.com/150'">
-                        <h4>${prod.nombre}</h4>
-                        <p>${prod.precio} €</p>
-                        <button class="btn" onclick="verProducto(${prod.id})">Ver Detalles</button>
-                    `;
-                    container.appendChild(card);
-                });
+            // Título
+            const categoria = tienda.categorias.find(c => c.id == catId);
+            if(categoria) document.getElementById('category-title').textContent = categoria.nombre;
+
+            // Renderizar productos
+            const productos = tienda.productos.filter(p => p.id_categoria == catId);
+            const container = document.getElementById('category-products-container');
+
+            if(productos.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted)">No hay productos aquí.</p>';
             } else {
-                document.getElementById('category-title').innerText = "Categoría no encontrada";
+                productos.forEach(prod => {
+                    container.innerHTML += `
+                        <div class="card">
+                            <img src="${prod.imagen}" alt="${prod.nombre}" onerror="this.src='https://via.placeholder.com/150'">
+                            <h3>${prod.nombre}</h3>
+                            <p class="precio">${prod.precio} €</p>
+                            <button class="btn" onclick="verProducto(${prod.id})">Ver Detalles</button>
+                        </div>
+                    `;
+                });
             }
-            
-            actualizarContador();
         });
 
         function verProducto(id) {
             localStorage.setItem('current_product_id', id);
             window.location.href = 'product.html';
-        }
-
-        function actualizarContador() {
-            const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-            document.getElementById('cart-count').textContent = carrito.length;
         }
     </script>
 </body>

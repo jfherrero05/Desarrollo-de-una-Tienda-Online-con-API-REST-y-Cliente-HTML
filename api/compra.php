@@ -1,56 +1,56 @@
 <?php
+// api/compra.php
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
 
+// Recibir JSON
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 
-// 1. Validar entrada básica
-if (!isset($data['token']) || !isset($data['productos']) || !is_array($data['productos'])) {
+// 1. Validaciones básicas
+if (!isset($data['carrito']) || !is_array($data['carrito'])) {
     http_response_code(400);
-    echo json_encode(["status" => "error", "message" => "Datos inválidos"]);
+    echo json_encode(["status" => "error", "message" => "Carrito vacío o formato incorrecto"]);
     exit;
 }
 
-// 2. Validación simple de Token (en un caso real sería más complejo)
-if ($data['token'] !== "TOKEN-TIENDA-RA4-2024") {
-    http_response_code(401);
-    echo json_encode(["status" => "error", "message" => "Token inválido o expirado"]);
-    exit;
-}
-
-// 3. Cargar base de datos de productos
+// 2. Cargar Tienda (Simulación de BBDD)
 $rutaTienda = __DIR__ . '/../data/tienda.json';
+
 if (!file_exists($rutaTienda)) {
     http_response_code(500);
-    echo json_encode(["status" => "error", "message" => "Error de servidor interna"]);
+    echo json_encode(["status" => "error", "message" => "Error interno: No se encuentra tienda.json"]);
     exit;
 }
 
 $tiendaData = json_decode(file_get_contents($rutaTienda), true);
 $productosDB = $tiendaData['productos'];
 
-// 4. Calcular TOTAL REAL (Seguridad)
-$totalReal = 0;
-$productosCompradosIds = $data['productos'];
+// 3. Calcular Total Real (Seguridad)
+$totalServidor = 0;
+$carritoCliente = $data['carrito'];
 
-// Recorremos los IDs que envía el cliente
-foreach ($productosCompradosIds as $idCliente) {
-    $encontrado = false;
-    // Buscamos ese ID en nuestra "Base de datos" (JSON)
+foreach ($carritoCliente as $item) {
+    // Validar estructura del item
+    if(!isset($item['id']) || !isset($item['cantidad'])) continue;
+    
+    $id = $item['id'];
+    $cantidad = $item['cantidad'];
+    
+    // Buscar precio real
     foreach ($productosDB as $prodDB) {
-        if ($prodDB['id'] == $idCliente) {
-            $totalReal += $prodDB['precio'];
-            $encontrado = true;
-            break;
+        if ($prodDB['id'] == $id) {
+            $totalServidor += ($prodDB['precio'] * $cantidad);
+            break; 
         }
     }
 }
 
-// 5. Responder éxito
+// 4. Respuesta Exitosa
 echo json_encode([
     "status" => "success",
-    "message" => "Pedido procesado correctamente",
-    "total" => $totalReal // Devolvemos el total calculado por el servidor para confirmar
+    "message" => "Pedido procesado",
+    "total" => $totalServidor
 ]);
 ?>
